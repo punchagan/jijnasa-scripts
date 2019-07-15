@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
+
+BASE_URL="https://api.github.com/users/"
+USERNAME="$1"
+
+echo Creating user "${USERNAME}"
+
+INFO_CACHE_PATH="/tmp/gh-${USERNAME}.json"
+KEYS_CACHE_PATH="/tmp/gh-${USERNAME}-keys.json"
+
+if [ ! -f "${INFO_CACHE_PATH}" ]; then
+    curl "${BASE_URL}${USERNAME}" > "${INFO_CACHE_PATH}"
+fi
+if [ ! -f "${KEYS_CACHE_PATH}" ]; then
+    curl "${BASE_URL}${USERNAME}/keys" > "${KEYS_CACHE_PATH}"
+fi
+
+NAME=$(cat "${INFO_CACHE_PATH}"|jq -r .name)
+GECOS=$(echo $NAME,,,)
+SSH_KEY=$(cat /tmp/gh-"${USERNAME}"-keys.json |jq -r .[0].key)
+SSH_PATH="/home/${USERNAME}/.ssh/"
+
+adduser --disabled-password "${USERNAME}" --gecos "${GECOS}"
+mkdir -p "${SSH_PATH}"
+echo "${SSH_KEY}" >> "${SSH_PATH}/authorized_keys"

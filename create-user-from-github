@@ -25,3 +25,6 @@ SSH_PATH="/home/${USERNAME}/.ssh/"
 adduser --disabled-password "${USERNAME}" --gecos "${GECOS}"
 mkdir -p "${SSH_PATH}"
 echo "${SSH_KEY}" >> "${SSH_PATH}/authorized_keys"
+
+# Add user to docker group (Useful for Zulip development)
+adduser "${USERNAME}" docker

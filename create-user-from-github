@@ -19,12 +19,13 @@ fi
 
 NAME=$(cat "${INFO_CACHE_PATH}"|jq -r .name)
 GECOS=$(echo $NAME,,,)
-SSH_KEY=$(cat /tmp/gh-"${USERNAME}"-keys.json |jq -r .[0].key)
 SSH_PATH="/home/${USERNAME}/.ssh/"
 
 adduser --disabled-password "${USERNAME}" --gecos "${GECOS}"
 mkdir -p "${SSH_PATH}"
-echo "${SSH_KEY}" >> "${SSH_PATH}/authorized_keys"
+while read -r key; do
+    echo "${key}" >> "${SSH_PATH}/authorized_keys"
+done <<< $(cat /tmp/gh-"${USERNAME}"-keys.json |jq -r .[0].key)
 
 # Add user to docker group (Useful for Zulip development)
 adduser "${USERNAME}" docker
